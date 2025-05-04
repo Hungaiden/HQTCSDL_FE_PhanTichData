@@ -1,0 +1,48 @@
+.role-form {
+  padding: 1.25rem;
+  
+  .permissions-table {
+    margin-top: 1rem;
+    overflow-x: auto;
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      
+      th, td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      th {
+        font-weight: 600;
+        background-color: var(--bg-light);
+      }
+      
+      td {
+        vertical-align: middle;
+        
+        &:first-child {
+          font-weight: 500;
+        }
+      }
+      
+      .other-permissions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        
+        label {
+          display: flex;
+          align-items: center;
+          font-size: 0.75rem;
+          
+          input {
+            margin-right: 0.5rem;
+          }
+        }
+      }
+    }
+  }
+}

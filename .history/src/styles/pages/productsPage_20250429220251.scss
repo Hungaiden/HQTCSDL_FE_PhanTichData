@@ -1,0 +1,148 @@
+.products-page {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  .page-header {
+    margin-bottom: 2rem;
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .breadcrumb {
+      color: var(--text-light);
+      
+      a {
+        color: var(--text-dark);
+        text-decoration: none;
+        
+        &:hover {
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+  
+  .products-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .filter-toggle-mobile {
+    display: none;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    @media (max-width: 992px) {
+      display: flex;
+    }
+  }
+  
+  .filters-sidebar {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    
+    @media (max-width: 992px) {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 280px;
+      height: 100vh;
+      z-index: 1000;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      
+      &.open {
+        left: 0;
+      }
+    }
+    
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      
+      h3 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+      
+      .close-filters {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: var(--text-dark);
+        
+        @media (max-width: 992px) {
+          display: block;
+        }
+      }
+    }
+    
+    .filters-content {
+      padding: 1rem;
+      
+      .filter-group {
+        margin-bottom: 1.5rem;
+        
+        .filter-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          cursor: pointer;
+          
+          h4 {
+            margin: 0;
+            font-size: 1rem;
+          }
+        }
+        
+        .filter-options {
+          .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            
+            input {
+              margin-right: 0.5rem;
+            }
+          }
+          
+          .price-range {
+            .price-inputs {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 1rem;
+              
+              input {
+                width: 100%;
+                padding: 0.5rem;
+                border

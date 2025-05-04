@@ -1,0 +1,74 @@
+.role-management-page {
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    
+    .role-card {
+      background-color: var(--bg-white);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      
+      .role-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        
+        h3 {
+          margin: 0;
+        }
+      }
+      
+      .role-description {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+      }
+      
+      .role-users {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+      
+      .permissions-section {
+        h4 {
+          font-size: 0.875rem;
+          margin-bottom: 0.75rem;
+          padding-top: 0.75rem;
+          border-top: 1px solid var(--border-color);
+        }
+        
+        .permissions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 1rem;
+          
+          .permission-module {
+            h5 {
+              font-size: 0.75rem;
+              margin-bottom: 0.5rem;
+            }
+            
+            ul {
+              li {
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+                
+                &.allowed {
+                  color: var(--success-color);
+                }
+                
+                &.denied {
+                  color: var(--text-muted);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
