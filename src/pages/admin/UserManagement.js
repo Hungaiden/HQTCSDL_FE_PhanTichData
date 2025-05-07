@@ -12,6 +12,7 @@ import {
 import UserFormModal from "../../components/users/UserFormModal";
 import DeleteConfirmModal from "../../components/common/DeleteConfirmModal";
 import "../../styles/pages/userManagement.scss";
+import Pagination from "../../components/common/Pagination";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -22,20 +23,27 @@ const UserManagement = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [filterRole, setFilterRole] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10
+  });
 
   // Fetch users data when component mounts
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  // Update fetchUsers to handle pagination  
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/accounts"
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/accounts?page=${pagination.currentPage}&limit=${pagination.limit}`
       );
       const data = await response.json();
-      if (data.data && data.data.accounts) {
-        const formattedUsers = data.data.accounts.map((user) => ({
+      if (data.data) {
+        const { accounts, pagination: paginationData } = data.data;
+        const formattedUsers = accounts.map((user) => ({
           id: user._id,
           name: user.fullName,
           email: user.email,
@@ -44,6 +52,7 @@ const UserManagement = () => {
           lastLogin: user.deletedAt || "Chưa đăng nhập",
         }));
         setUsers(formattedUsers);
+        setPagination(paginationData);
       }
       setLoading(false);
     } catch (error) {
@@ -51,6 +60,11 @@ const UserManagement = () => {
       setLoading(false);
     }
   };
+
+  // Update useEffect to refetch when page changes
+  useEffect(() => {
+    fetchUsers();
+  }, [pagination.currentPage]);
 
   const handleAddUser = () => {
     setCurrentUser(null);
@@ -253,6 +267,12 @@ const UserManagement = () => {
           </table>
         </div>
       )}
+
+      <Pagination
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={(page) => setPagination({...pagination, currentPage: page})}
+      />
 
       {showUserModal && (
         <UserFormModal

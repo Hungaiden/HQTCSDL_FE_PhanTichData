@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import ProductCategoryFormModal from "../../components/product-categories/ProductCategoryFormModal";
 import DeleteConfirmModal from "../../components/common/DeleteConfirmModal";
+import Pagination from "../../components/common/Pagination";
 import "../../styles/pages/productCategoryManagement.scss";
 
 const ProductCategoryManagement = () => {
@@ -13,21 +14,27 @@ const ProductCategoryManagement = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10,
+  });
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [pagination.currentPage]);
 
   const fetchCategories = async () => {
     try {
       const response = await fetch(
-        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories"
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories?page=${pagination.currentPage}&limit=${pagination.limit}`
       );
       const data = await response.json();
       console.log("API Response:", data); // Thêm log để kiểm tra dữ liệu
 
-      if (data.data && Array.isArray(data.data.categories)) {
-        const formattedCategories = data.data.categories.map((category) => ({
+      if (data.data) {
+        const { categories, pagination: paginationData } = data.data;
+        const formattedCategories = categories.map((category) => ({
           id: category._id || "",
           name: category.title || "Chưa có tên",
           description: category.description || "",
@@ -35,6 +42,7 @@ const ProductCategoryManagement = () => {
           position: category.position || 0,
         }));
         setCategories(formattedCategories);
+        setPagination(paginationData);
       } else {
         // Nếu không có dữ liệu hoặc dữ liệu không đúng format
         setCategories([]);
@@ -152,7 +160,7 @@ const ProductCategoryManagement = () => {
         <table className="categories-table">
           <thead>
             <tr>
-              <th> ID </th> <th> Tên danh mục </th> <th> Mô tả </th>{" "}
+              <th> Tên danh mục </th> <th> Mô tả </th>{" "}
               <th> Vị trí </th> <th> Trạng thái </th> <th> Thao tác </th>{" "}
             </tr>{" "}
           </thead>{" "}
@@ -160,7 +168,7 @@ const ProductCategoryManagement = () => {
             {" "}
             {filteredCategories.map((category) => (
               <tr key={category.id}>
-                <td> #{category.id} </td> <td> {category.name} </td>{" "}
+                <td> {category.name} </td>{" "}
                 <td> {category.description} </td> <td> {category.position} </td>{" "}
                 <td>
                   <span
@@ -193,6 +201,13 @@ const ProductCategoryManagement = () => {
           </tbody>{" "}
         </table>{" "}
       </div>
+      <Pagination
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={(page) =>
+          setPagination({ ...pagination, currentPage: page })
+        }
+      />
       {showCategoryModal && (
         <ProductCategoryFormModal
           category={currentCategory}

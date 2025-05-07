@@ -6,40 +6,88 @@ import { Link } from "react-router-dom"
 import "../../styles/pages/homePage.scss"
 
 const HomePage = () => {
+  const [categories, setCategories] = useState([])  
   const [featuredProducts, setFeaturedProducts] = useState([])
-  const [newArrivals, setNewArrivals] = useState([])
-  const [bestSellers, setBestSellers] = useState([])
+  const [newArrivals, setNewArrivals] = useState([]) // Thêm state
+  const [bestSellers, setBestSellers] = useState([]) // Thêm state  
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulating API calls to fetch products
-    // In a real app, these would be API calls
-    setFeaturedProducts([
-      {
-        id: 1,
-        name: "Áo thun nam cổ tròn",
-        price: 299000,
-        image: "/placeholder.svg?height=300&width=300",
-        discount: 0,
-      },
-      { id: 2, name: "Đầm nữ mùa hè", price: 499000, image: "/placeholder.svg?height=300&width=300", discount: 20 },
-      { id: 3, name: "Áo hoodie unisex", price: 399000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-      { id: 4, name: "Quần jean nữ", price: 599000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-    ])
-
-    setNewArrivals([
-      { id: 5, name: "Áo sơ mi nam", price: 459000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-      { id: 6, name: "Áo kiểu nữ", price: 349000, image: "/placeholder.svg?height=300&width=300", discount: 15 },
-      { id: 7, name: "Quần jean nam", price: 549000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-      { id: 8, name: "Áo len nữ", price: 449000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-    ])
-
-    setBestSellers([
-      { id: 9, name: "Áo khoác denim", price: 699000, image: "/placeholder.svg?height=300&width=300", discount: 10 },
-      { id: 10, name: "Váy dài nữ", price: 799000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-      { id: 11, name: "Áo polo nam", price: 359000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-      { id: 12, name: "Quần short nam", price: 299000, image: "/placeholder.svg?height=300&width=300", discount: 0 },
-    ])
+    fetchCategories()
+    fetchFeaturedProducts()
+    fetchNewArrivals() // Thêm fetch
+    fetchBestSellers() // Thêm fetch
   }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/all"
+      )
+      const data = await response.json()
+      if (data.data && data.data.categories) {
+        const activeCategories = data.data.categories
+          .filter(cat => cat.status === "active")
+          .slice(0, 3) // Chỉ lấy 3 danh mục đầu tiên
+        setCategories(activeCategories)
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+    }
+  }
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products"
+      )
+      const data = await response.json()
+      if (data.data && data.data.products) {
+        const featured = data.data.products
+          .filter(product => product.featured === "1")
+          .slice(0, 8) // Chỉ lấy 8 sản phẩm nổi bật
+        setFeaturedProducts(featured)
+      }
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching products:", error)
+      setLoading(false)
+    }
+  }
+
+  const fetchNewArrivals = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products?sort=newest"
+      )
+      const data = await response.json()
+      if (data.data && data.data.products) {
+        const newProducts = data.data.products
+          .filter(product => product.status === "active")
+          .slice(0, 8)
+        setNewArrivals(newProducts)
+      }
+    } catch (error) {
+      console.error("Error fetching new arrivals:", error)
+    }
+  }
+
+  const fetchBestSellers = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products?sort=bestselling"
+      )
+      const data = await response.json()
+      if (data.data && data.data.products) {
+        const bestSelling = data.data.products
+          .filter(product => product.status === "active")
+          .slice(0, 8)
+        setBestSellers(bestSelling)
+      }
+    } catch (error) {
+      console.error("Error fetching best sellers:", error)
+    }
+  }
 
   return (
     <div className="home-page">
@@ -56,7 +104,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Categories Section */}
       <section className="categories-section">
         <div className="container">
           <div className="section-header">
@@ -67,46 +115,30 @@ const HomePage = () => {
           </div>
 
           <div className="categories-grid">
-            <div className="category-card">
-              <div className="category-image">
-                <img src="/placeholder.svg?height=400&width=300" alt="Thời trang nam" />
+            {categories.map((category) => (
+              <div className="category-card" key={category._id}>
+                <div className="category-image">
+                  <img 
+                    src={category.thumbnail || "/placeholder.svg?height=400&width=300"} 
+                    alt={category.title} 
+                  />
+                </div>
+                <div className="category-content">
+                  <h3>{category.title}</h3>
+                  <Link 
+                    to={`/products?category=${category.slug}`} 
+                    className="btn-outline"
+                  >
+                    Khám phá
+                  </Link>
+                </div>
               </div>
-              <div className="category-content">
-                <h3>Thời trang nam</h3>
-                <Link to="/products?category=nam" className="btn-outline">
-                  Khám phá
-                </Link>
-              </div>
-            </div>
-
-            <div className="category-card">
-              <div className="category-image">
-                <img src="/placeholder.svg?height=400&width=300" alt="Thời trang nữ" />
-              </div>
-              <div className="category-content">
-                <h3>Thời trang nữ</h3>
-                <Link to="/products?category=nu" className="btn-outline">
-                  Khám phá
-                </Link>
-              </div>
-            </div>
-
-            <div className="category-card">
-              <div className="category-image">
-                <img src="/placeholder.svg?height=400&width=300" alt="Phụ kiện" />
-              </div>
-              <div className="category-content">
-                <h3>Phụ kiện</h3>
-                <Link to="/products?category=phu-kien" className="btn-outline">
-                  Khám phá
-                </Link>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Products Section */}
       <section className="products-section">
         <div className="container">
           <div className="section-header">
@@ -116,37 +148,41 @@ const HomePage = () => {
             </Link>
           </div>
 
-          <div className="products-grid">
-            {featuredProducts.map((product) => (
-              <div className="product-card" key={product.id}>
-                <div className="product-image">
-                  <img src={product.image || "/placeholder.svg"} alt={product.name} />
-                  {product.discount > 0 && <span className="discount-badge">-{product.discount}%</span>}
-                  <div className="product-actions">
-                    <button className="btn-quick-view">Xem nhanh</button>
-                    <button className="btn-add-to-cart">Thêm vào giỏ</button>
-                  </div>
+          {loading ? (
+            <div className="loading">Đang tải...</div>
+          ) : (
+            <div className="products-grid">
+              {featuredProducts.map((product) => (
+                <div className="product-card" key={product._id}>
+                  <Link to={`/products/${product._id}`}>
+                    <div className="product-image">
+                      <img
+                        src={product.thumbnail || "/placeholder.svg"}
+                        alt={product.title}
+                      />
+                    </div>
+                    <div className="product-info">
+                      <h3 className="product-name">{product.title}</h3>
+                      <div className="product-price">
+                        {product.discount > 0 ? (
+                          <>
+                            <span className="discounted-price">
+                              ${((product.price * (100 - product.discount)) / 100).toLocaleString()}
+                            </span>
+                            <span className="original-price">
+                              ${product.price.toLocaleString()}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="price">${product.price.toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
                 </div>
-                <div className="product-info">
-                  <h3 className="product-name">
-                    <Link to={`/products/${product.id}`}>{product.name}</Link>
-                  </h3>
-                  <div className="product-price">
-                    {product.discount > 0 ? (
-                      <>
-                        <span className="current-price">
-                          {((product.price * (100 - product.discount)) / 100).toLocaleString()}đ
-                        </span>
-                        <span className="original-price">{product.price.toLocaleString()}đ</span>
-                      </>
-                    ) : (
-                      <span className="current-price">{product.price.toLocaleString()}đ</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -175,32 +211,37 @@ const HomePage = () => {
 
           <div className="products-grid">
             {newArrivals.map((product) => (
-              <div className="product-card" key={product.id}>
-                <div className="product-image">
-                  <img src={product.image || "/placeholder.svg"} alt={product.name} />
-                  {product.discount > 0 && <span className="discount-badge">-{product.discount}%</span>}
-                  <div className="product-actions">
-                    <button className="btn-quick-view">Xem nhanh</button>
-                    <button className="btn-add-to-cart">Thêm vào giỏ</button>
-                  </div>
-                </div>
-                <div className="product-info">
-                  <h3 className="product-name">
-                    <Link to={`/products/${product.id}`}>{product.name}</Link>
-                  </h3>
-                  <div className="product-price">
-                    {product.discount > 0 ? (
-                      <>
-                        <span className="current-price">
-                          {((product.price * (100 - product.discount)) / 100).toLocaleString()}đ
-                        </span>
-                        <span className="original-price">{product.price.toLocaleString()}đ</span>
-                      </>
-                    ) : (
-                      <span className="current-price">{product.price.toLocaleString()}đ</span>
+              <div className="product-card" key={product._id}>
+                <Link to={`/products/${product._id}`}>
+                  <div className="product-image">
+                    <img
+                      src={product.thumbnail || "/placeholder.svg"}
+                      alt={product.title}
+                    />
+                    {product.discountPercentage > 0 && (
+                      <span className="discount-badge">
+                        -{product.discountPercentage}%
+                      </span>
                     )}
                   </div>
-                </div>
+                  <div className="product-info">
+                    <h3 className="product-name">{product.title}</h3>
+                    <div className="product-price">
+                      {product.discountPercentage > 0 ? (
+                        <>
+                          <span className="current-price">
+                            ${((product.price * (100 - product.discountPercentage)) / 100).toLocaleString()}
+                          </span>
+                          <span className="original-price">
+                            ${product.price.toLocaleString()}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="price">${product.price.toLocaleString()}</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
               </div>
             ))}
           </div>
@@ -219,39 +260,44 @@ const HomePage = () => {
 
           <div className="products-grid">
             {bestSellers.map((product) => (
-              <div className="product-card" key={product.id}>
-                <div className="product-image">
-                  <img src={product.image || "/placeholder.svg"} alt={product.name} />
-                  {product.discount > 0 && <span className="discount-badge">-{product.discount}%</span>}
-                  <div className="product-actions">
-                    <button className="btn-quick-view">Xem nhanh</button>
-                    <button className="btn-add-to-cart">Thêm vào giỏ</button>
-                  </div>
-                </div>
-                <div className="product-info">
-                  <h3 className="product-name">
-                    <Link to={`/products/${product.id}`}>{product.name}</Link>
-                  </h3>
-                  <div className="product-price">
-                    {product.discount > 0 ? (
-                      <>
-                        <span className="current-price">
-                          {((product.price * (100 - product.discount)) / 100).toLocaleString()}đ
-                        </span>
-                        <span className="original-price">{product.price.toLocaleString()}đ</span>
-                      </>
-                    ) : (
-                      <span className="current-price">{product.price.toLocaleString()}đ</span>
+              <div className="product-card" key={product._id}>
+                <Link to={`/products/${product._id}`}>
+                  <div className="product-image">
+                    <img
+                      src={product.thumbnail || "/placeholder.svg"}
+                      alt={product.title}
+                    />
+                    {product.discountPercentage > 0 && (
+                      <span className="discount-badge">
+                        -{product.discountPercentage}%
+                      </span>
                     )}
                   </div>
-                </div>
+                  <div className="product-info">
+                    <h3 className="product-name">{product.title}</h3>
+                    <div className="product-price">
+                      {product.discountPercentage > 0 ? (
+                        <>
+                          <span className="current-price">
+                            ${((product.price * (100 - product.discountPercentage)) / 100).toLocaleString()}
+                          </span>
+                          <span className="original-price">
+                            ${product.price.toLocaleString()}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="price">${product.price.toLocaleString()}</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* Features - Moved to bottom
       <section className="features-section">
         <div className="container">
           <div className="features-grid">
@@ -296,7 +342,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }

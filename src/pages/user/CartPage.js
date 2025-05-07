@@ -127,6 +127,10 @@ const CartPage = () => {
     return calculateSubtotal() + calculateShipping() - calculateDiscount()
   }
 
+  const formatPrice = (price) => {
+    return `$${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  }
+
   if (loading) {
     return (
       <div className="cart-loading">
@@ -193,11 +197,11 @@ const CartPage = () => {
                     <div className="price-col">
                       {item.discount > 0 ? (
                         <>
-                          <span className="current-price">{discountedPrice.toLocaleString()}đ</span>
-                          <span className="original-price">{item.price.toLocaleString()}đ</span>
+                          <span className="current-price">{formatPrice(discountedPrice)}</span>
+                          <span className="original-price">{formatPrice(item.price)}</span>
                         </>
                       ) : (
-                        <span className="current-price">{item.price.toLocaleString()}đ</span>
+                        <span className="current-price">{formatPrice(item.price)}</span>
                       )}
                     </div>
 
@@ -223,7 +227,7 @@ const CartPage = () => {
                     </div>
 
                     <div className="total-col">
-                      <span className="item-total">{calculateItemTotal(item).toLocaleString()}đ</span>
+                      <span className="item-total">{formatPrice(calculateItemTotal(item))}</span>
                     </div>
 
                     <div className="action-col">
@@ -278,23 +282,23 @@ const CartPage = () => {
               <div className="summary-details">
                 <div className="summary-row">
                   <span className="summary-label">Tạm tính</span>
-                  <span className="summary-value">{calculateSubtotal().toLocaleString()}đ</span>
+                  <span className="summary-value">{formatPrice(calculateSubtotal())}</span>
                 </div>
                 <div className="summary-row">
                   <span className="summary-label">Phí vận chuyển</span>
                   <span className="summary-value">
-                    {calculateShipping() === 0 ? "Miễn phí" : calculateShipping().toLocaleString() + "đ"}
+                    {calculateShipping() === 0 ? "Free" : formatPrice(calculateShipping())}
                   </span>
                 </div>
                 {couponApplied && (
                   <div className="summary-row discount">
                     <span className="summary-label">Giảm giá</span>
-                    <span className="summary-value">-{calculateDiscount().toLocaleString()}đ</span>
+                    <span className="summary-value">-{formatPrice(calculateDiscount())}</span>
                   </div>
                 )}
                 <div className="summary-row total">
                   <span className="summary-label">Tổng cộng</span>
-                  <span className="summary-value">{calculateTotal().toLocaleString()}đ</span>
+                  <span className="summary-value">{formatPrice(calculateTotal())}</span>
                 </div>
               </div>
 

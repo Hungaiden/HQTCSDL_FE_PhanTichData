@@ -13,8 +13,11 @@ const ProductsPage = () => {
   const [priceRange, setPriceRange] = useState([0, 2000000])
   const [sortBy, setSortBy] = useState("newest")
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const productsPerPage = 12
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    limit: 12
+  });
 
   // Fetch products from API
   useEffect(() => {
@@ -25,41 +28,58 @@ const ProductsPage = () => {
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products"
-      )
-      const data = await response.json()
-      if (data.data && data.data.products) {
-        const formattedProducts = data.data.products.map(product => ({
-          id: product._id,
-          name: product.title,
-          category: product.category || "Chưa phân loại",
-          price: product.price,
-          originalPrice: product.originalPrice || product.price,
-          discount: product.discount || 0,
-          image: product.image || "/placeholder.svg?height=300&width=300",
-          rating: product.rating || 4.0,
-          ratingCount: product.ratingCount || 0,
-          isNew: product.isNew || false
-        }))
-        setProducts(formattedProducts)
-        setFilteredProducts(formattedProducts)
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products?page=${pagination.currentPage}&limit=${pagination.limit}`
+      );
+      const data = await response.json();
+      if (data.data) {
+        const { products: productsData, pagination: paginationData } = data.data;
+        const formattedProducts = await Promise.all(productsData.map(async (product) => {
+          // Fetch category info for each product
+          const categoryResponse = await fetch(
+            `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/${product.category_id}`
+          );
+          const categoryData = await categoryResponse.json();
+          const category = categoryData.data;
+
+          return {
+            id: product._id,
+            name: product.title,
+            categoryId: product.category_id,
+            category: category ? category.title : "Chưa phân loại",
+            price: product.price,
+            originalPrice: product.originalPrice || product.price,
+            discount: product.discount || 0,
+            image: product.thumbnail || "/placeholder.svg",
+            rating: product.rating || 4.0,
+            ratingCount: product.ratingCount || 0,
+            isNew: product.isNew || false
+          };
+        }));
+        setProducts(formattedProducts);
+        setFilteredProducts(formattedProducts);
+        setPagination(paginationData);
       }
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching products:", error)
-      setLoading(false)
+      console.error("Error fetching products:", error);
+      setLoading(false);
     }
-  }
+  };
 
   const fetchCategories = async () => {
     try {
       const response = await fetch(
-        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories"
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/all"
       )
       const data = await response.json()
-      if (data.data && Array.isArray(data.data.categories)) {
-        const categoryNames = data.data.categories.map(cat => cat.title)
-        setCategories(categoryNames)
+      if (data.data && data.data.categories) {
+        const categories = data.data.categories
+          .filter(cat => cat.status === "active") // Chỉ lấy các danh mục active
+          .map(cat => ({
+            id: cat._id,
+            title: cat.title
+          }))
+        setCategories(categories)
       }
     } catch (error) {
       console.error("Error fetching categories:", error)
@@ -70,9 +90,11 @@ const ProductsPage = () => {
   const applyFilters = () => {
     let filtered = [...products]
 
-    // Filter by category
+    // Filter by category titles
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter((product) => selectedCategories.includes(product.category))
+      filtered = filtered.filter((product) => 
+        selectedCategories.includes(product.category)
+      )
     }
 
     // Filter by price
@@ -98,7 +120,10 @@ const ProductsPage = () => {
     }
 
     setFilteredProducts(filtered)
-    setCurrentPage(1)
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1
+    }));
   }
 
   // Handle category selection
@@ -122,13 +147,18 @@ const ProductsPage = () => {
     applyFilters()
   }, [selectedCategories, priceRange, sortBy])
 
-  // Pagination
-  const indexOfLastProduct = currentPage * productsPerPage
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
+  // Update useEffect to refetch when page changes
+  useEffect(() => {
+    fetchProducts();
+  }, [pagination.currentPage]);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+  // Update paginate function
+  const paginate = (pageNumber) => {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: pageNumber
+    }));
+  };
 
   // Toggle mobile filters
   const toggleFilters = () => {
@@ -144,7 +174,7 @@ const ProductsPage = () => {
 
   // Format price to VND
   const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "đ"
+    return `$${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
   }
 
   // Render star rating
@@ -204,14 +234,14 @@ const ProductsPage = () => {
                   </span>
                 </div>
                 <div className="filter-options">
-                  {categories.map((category, index) => (
-                    <label key={index} className="checkbox-label">
+                  {categories.map((category) => (
+                    <label key={category.id} className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => handleCategoryChange(category)}
+                        checked={selectedCategories.includes(category.title)}
+                        onChange={() => handleCategoryChange(category.title)}
                       />
-                      {category}
+                      {category.title}
                     </label>
                   ))}
                 </div>
@@ -307,7 +337,7 @@ const ProductsPage = () => {
               </div>
             ) : (
               <div className="products-grid">
-                {currentProducts.map((product) => (
+                {filteredProducts.map((product) => (
                   <div className="product-card" key={product.id}>
                     {product.isNew && <div className="product-badge">Mới</div>}
                     <Link to={`/products/${product.id}`} className="product-card-link">
@@ -350,18 +380,18 @@ const ProductsPage = () => {
                 <ul className="pagination-list">
                   <li className="pagination-item">
                     <button
-                      onClick={() => paginate(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className={currentPage === 1 ? "disabled" : ""}
+                      onClick={() => paginate(pagination.currentPage - 1)}
+                      disabled={pagination.currentPage === 1}
+                      className={pagination.currentPage === 1 ? "disabled" : ""}
                     >
                       <i className="fas fa-chevron-left"></i>
                     </button>
                   </li>
-                  {[...Array(totalPages).keys()].map((number) => (
+                  {[...Array(pagination.totalPages).keys()].map((number) => (
                     <li key={number + 1} className="pagination-item">
                       <button
                         onClick={() => paginate(number + 1)}
-                        className={currentPage === number + 1 ? "active" : ""}
+                        className={pagination.currentPage === number + 1 ? "active" : ""}
                       >
                         {number + 1}
                       </button>
@@ -369,9 +399,9 @@ const ProductsPage = () => {
                   ))}
                   <li className="pagination-item">
                     <button
-                      onClick={() => paginate(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className={currentPage === totalPages ? "disabled" : ""}
+                      onClick={() => paginate(pagination.currentPage + 1)}
+                      disabled={pagination.currentPage === pagination.totalPages}
+                      className={pagination.currentPage === pagination.totalPages ? "disabled" : ""}
                     >
                       <i className="fas fa-chevron-right"></i>
                     </button>

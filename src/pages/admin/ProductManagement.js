@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter } from "react-icons/fa";
 import ProductFormModal from "../../components/products/ProductFormModal";
 import DeleteConfirmModal from "../../components/common/DeleteConfirmModal";
+import Pagination from "../../components/common/Pagination";
 import "../../styles/pages/productManagement.scss";
 
 const ProductManagement = () => {
@@ -15,28 +16,61 @@ const ProductManagement = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [filterStatus, setFilterStatus] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10,
+  });
+  const [categories, setCategories] = useState([]); // State for categories list
 
-  // Fetch products when component mounts
+  // Add new state for selected category ID
+  const [filterCategoryId, setFilterCategoryId] = useState("");
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+    fetchCategories();
+  }, [pagination.currentPage]);
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/all"
+      );
+      const data = await response.json();
+      if (data.data && data.data.categories) {
+        setCategories(data.data.categories);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  // Add helper function to get category name
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat._id === categoryId);
+    return category ? category.title : "Chưa phân loại";
+  };
+
+  // Update fetchProducts to include categoryId
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products"
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products?page=${pagination.currentPage}&limit=${pagination.limit}`
       );
       const data = await response.json();
-      if (data.data && data.data.products) {
-        const formattedProducts = data.data.products.map((product) => ({
+      if (data.data) {
+        const { products, pagination: paginationData } = data.data;
+        const formattedProducts = products.map((product) => ({
           id: product._id,
           name: product.title,
+          categoryId: product.category_id, // Store category ID
           category: product.category || "Chưa phân loại",
           price: product.price,
           status: product.status || "Còn hàng",
           stock: product.stock || 0,
         }));
         setProducts(formattedProducts);
+        setPagination(paginationData);
       }
       setLoading(false);
     } catch (error) {
@@ -118,16 +152,16 @@ const ProductManagement = () => {
     }
   };
 
+  // Update filter logic to use categoryId
   const filteredProducts = products.filter((product) => {
     return (
-      (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (filterCategory === "" || product.category === filterCategory) &&
+      (product.name.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (filterCategoryId === "" || product.categoryId === filterCategoryId) &&
       (filterStatus === "" || product.status === filterStatus)
     );
   });
 
-  const categories = [...new Set(products.map((p) => p.category))];
+  const categoriesList = [...new Set(products.map((p) => p.category))];
   const statuses = [...new Set(products.map((p) => p.status))];
 
   if (loading) {
@@ -155,14 +189,14 @@ const ProductManagement = () => {
         <div className="filter-box">
           <FaFilter />
           <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
+            value={filterCategoryId}
+            onChange={(e) => setFilterCategoryId(e.target.value)}
           >
             <option value=""> Tất cả danh mục </option>{" "}
             {categories.map((category) => (
-              <option key={category} value={category}>
+              <option key={category._id} value={category._id}>
                 {" "}
-                {category}{" "}
+                {category.title}{" "}
               </option>
             ))}{" "}
           </select>{" "}
@@ -184,7 +218,7 @@ const ProductManagement = () => {
         <table className="products-table">
           <thead>
             <tr>
-              <th> ID </th> <th> Hình ảnh </th> <th> Tên sản phẩm </th>{" "}
+              <th> Tên sản phẩm </th>{" "} <th> Hình ảnh </th> 
               <th> Danh mục </th> <th> Giá </th> <th> Tồn kho </th>{" "}
               <th> Trạng thái </th> <th> Thao tác </th>{" "}
             </tr>{" "}
@@ -193,17 +227,17 @@ const ProductManagement = () => {
             {" "}
             {filteredProducts.map((product) => (
               <tr key={product.id}>
-                <td> #{product.id} </td>{" "}
+                <td> {product.name} </td> 
                 <td>
                   <div className="product-image">
                     <img
-                      src="/placeholder.svg?height=40&width=40"
+                      src={product.thumbnail || "/placeholder.svg?height=100&width=100"}
                       alt={product.name}
                     />{" "}
                   </div>{" "}
                 </td>{" "}
-                <td> {product.name} </td> <td> {product.category} </td>{" "}
-                <td> {product.price.toLocaleString()}đ </td>{" "}
+                <td> {getCategoryName(product.categoryId)} </td>{" "}
+                <td> {product.price.toLocaleString()}$ </td>{" "}
                 <td> {product.stock} </td>{" "}
                 <td>
                   <span
@@ -239,12 +273,19 @@ const ProductManagement = () => {
           </tbody>{" "}
         </table>{" "}
       </div>
+      <Pagination
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={(page) =>
+          setPagination({ ...pagination, currentPage: page })
+        }
+      />
       {showProductModal && (
         <ProductFormModal
           product={currentProduct}
           onSave={handleSaveProduct}
           onClose={() => setShowProductModal(false)}
-          categories={categories}
+          categories={categoriesList}
         />
       )}
       {showDeleteModal && (

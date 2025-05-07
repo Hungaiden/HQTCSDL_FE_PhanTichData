@@ -74,13 +74,13 @@ const ProductFormModal = ({ product, onSave, onClose, categories }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="price">Giá (đ)</label>
+              <label htmlFor="price">Price ($)</label>
               <input
                 type="number"
                 id="price"
                 name="price"
                 min="0"
-                step="1000"
+                step="1"
                 value={formData.price}
                 onChange={handleChange}
                 required
