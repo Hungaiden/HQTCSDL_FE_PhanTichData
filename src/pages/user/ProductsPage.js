@@ -16,156 +16,55 @@ const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 12
 
-  // Simulated data fetch
+  // Fetch products from API
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const dummyProducts = [
-        {
-          id: 1,
-          name: "Áo polo nam",
-          category: "Thời trang nam",
-          price: 359000,
-          originalPrice: 450000,
-          discount: 20,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.5,
-          ratingCount: 120,
-          isNew: true,
-        },
-        {
-          id: 2,
-          name: "Quần short nam",
-          category: "Thời trang nam",
-          price: 299000,
-          originalPrice: 350000,
-          discount: 15,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.2,
-          ratingCount: 85,
-        },
-        {
-          id: 3,
-          name: "Váy đầm nữ",
-          category: "Thời trang nữ",
-          price: 799000,
-          originalPrice: 950000,
-          discount: 16,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.8,
-          ratingCount: 210,
-          isNew: true,
-        },
-        {
-          id: 4,
-          name: "Áo sơ mi nam",
-          category: "Thời trang nam",
-          price: 450000,
-          originalPrice: 550000,
-          discount: 18,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.3,
-          ratingCount: 95,
-        },
-        {
-          id: 5,
-          name: "Áo khoác nữ",
-          category: "Thời trang nữ",
-          price: 850000,
-          originalPrice: 1050000,
-          discount: 19,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.6,
-          ratingCount: 150,
-        },
-        {
-          id: 6,
-          name: "Quần jeans nam",
-          category: "Thời trang nam",
-          price: 550000,
-          originalPrice: 650000,
-          discount: 15,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.4,
-          ratingCount: 110,
-        },
-        {
-          id: 7,
-          name: "Áo thun nữ",
-          category: "Thời trang nữ",
-          price: 250000,
-          originalPrice: 300000,
-          discount: 17,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.2,
-          ratingCount: 80,
-          isNew: true,
-        },
-        {
-          id: 8,
-          name: "Giày thể thao nam",
-          category: "Giày dép",
-          price: 1200000,
-          originalPrice: 1500000,
-          discount: 20,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.7,
-          ratingCount: 180,
-        },
-        {
-          id: 9,
-          name: "Túi xách nữ",
-          category: "Phụ kiện",
-          price: 950000,
-          originalPrice: 1200000,
-          discount: 21,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.5,
-          ratingCount: 130,
-        },
-        {
-          id: 10,
-          name: "Đồng hồ nam",
-          category: "Phụ kiện",
-          price: 1800000,
-          originalPrice: 2200000,
-          discount: 18,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.9,
-          ratingCount: 220,
-          isNew: true,
-        },
-        {
-          id: 11,
-          name: "Quần dài nữ",
-          category: "Thời trang nữ",
-          price: 480000,
-          originalPrice: 600000,
-          discount: 20,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.3,
-          ratingCount: 90,
-        },
-        {
-          id: 12,
-          name: "Áo khoác nam",
-          category: "Thời trang nam",
-          price: 950000,
-          originalPrice: 1150000,
-          discount: 17,
-          image: "/placeholder.svg?height=300&width=300",
-          rating: 4.6,
-          ratingCount: 140,
-        },
-      ]
-
-      const uniqueCategories = [...new Set(dummyProducts.map((product) => product.category))]
-      setCategories(uniqueCategories)
-      setProducts(dummyProducts)
-      setFilteredProducts(dummyProducts)
-      setLoading(false)
-    }, 1000)
+    fetchProducts()
+    fetchCategories()
   }, [])
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products"
+      )
+      const data = await response.json()
+      if (data.data && data.data.products) {
+        const formattedProducts = data.data.products.map(product => ({
+          id: product._id,
+          name: product.title,
+          category: product.category || "Chưa phân loại",
+          price: product.price,
+          originalPrice: product.originalPrice || product.price,
+          discount: product.discount || 0,
+          image: product.image || "/placeholder.svg?height=300&width=300",
+          rating: product.rating || 4.0,
+          ratingCount: product.ratingCount || 0,
+          isNew: product.isNew || false
+        }))
+        setProducts(formattedProducts)
+        setFilteredProducts(formattedProducts)
+      }
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching products:", error)
+      setLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories"
+      )
+      const data = await response.json()
+      if (data.data && Array.isArray(data.data.categories)) {
+        const categoryNames = data.data.categories.map(cat => cat.title)
+        setCategories(categoryNames)
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+    }
+  }
 
   // Apply filters
   const applyFilters = () => {
