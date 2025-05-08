@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import "../../styles/pages/productsPage.scss"
+import { FaSearch } from "react-icons/fa"
 
 const ProductsPage = () => {
   const [loading, setLoading] = useState(true)
@@ -18,6 +19,7 @@ const ProductsPage = () => {
     totalPages: 1,
     limit: 12
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch products from API
   useEffect(() => {
@@ -25,10 +27,14 @@ const ProductsPage = () => {
     fetchCategories()
   }, [])
 
+  useEffect(() => {
+    fetchProducts();
+  }, [pagination.currentPage, searchTerm]);
+
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products?page=${pagination.currentPage}&limit=${pagination.limit}`
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products?page=${pagination.currentPage}&limit=${pagination.limit}&search=${searchTerm}`
       );
       const data = await response.json();
       if (data.data) {
@@ -44,7 +50,7 @@ const ProductsPage = () => {
           return {
             id: product._id,
             name: product.title,
-            categoryId: product.category_id,
+            categoryId: product.category_id, // Make sure this is correctly set
             category: category ? category.title : "Chưa phân loại",
             price: product.price,
             originalPrice: product.originalPrice || product.price,
@@ -70,114 +76,165 @@ const ProductsPage = () => {
     try {
       const response = await fetch(
         "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/all"
-      )
-      const data = await response.json()
+      );
+      const data = await response.json();
       if (data.data && data.data.categories) {
         const categories = data.data.categories
-          .filter(cat => cat.status === "active") // Chỉ lấy các danh mục active
+          .filter(cat => cat.status === "active")
           .map(cat => ({
             id: cat._id,
-            title: cat.title
-          }))
-        setCategories(categories)
+            title: cat.title,
+            parent_id: cat.parent_id
+          }));
+        // Build tree structure for nested display
+        const rootCategories = categories.filter(cat => !cat.parent_id);
+        const nestedCategories = rootCategories.map(cat => ({
+          ...cat,
+          children: getChildCategories(cat.id, categories)
+        }));
+        setCategories(nestedCategories);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error)
+      console.error("Error fetching categories:", error);
     }
-  }
+  };
 
-  // Apply filters
+  // Add helper function to get child categories
+  const getChildCategories = (parentId, allCategories) => {
+    const children = allCategories.filter(cat => cat.parent_id === parentId);
+    return children.map(child => ({
+      ...child,
+      children: getChildCategories(child.id, allCategories)
+    }));
+  };
+
+  const getAllChildrenIds = (categoryId, allCategories) => {
+    let ids = [categoryId];
+    const category = allCategories.find(cat => cat.id === categoryId);
+    if (category && category.children) {
+      category.children.forEach(child => {
+        ids = [...ids, ...getAllChildrenIds(child.id, allCategories)];
+      });
+    }
+    return ids;
+  };
+
   const applyFilters = () => {
-    let filtered = [...products]
+    let filtered = [...products];
 
-    // Filter by category titles
+    // Category filter
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter((product) => 
-        selectedCategories.includes(product.category)
-      )
+      const allCategoryIds = selectedCategories.flatMap(catId => 
+        getAllChildrenIds(catId, categories)
+      );
+      filtered = filtered.filter(product => 
+        allCategoryIds.includes(product.categoryId)
+      );
     }
 
-    // Filter by price
-    filtered = filtered.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
 
-    // Sort products
+    // Price filter
+    filtered = filtered.filter(product =>
+      product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
+
+    // Sort
     switch (sortBy) {
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price)
-        break
+        filtered.sort((a, b) => a.price - b.price);
+        break;
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price)
-        break
+        filtered.sort((a, b) => b.price - a.price);
+        break;
       case "name":
-        filtered.sort((a, b) => a.name.localeCompare(b.name))
-        break
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
       case "discount":
-        filtered.sort((a, b) => b.discount - a.discount)
-        break
-      default: // newest
-        filtered.sort((a, b) => b.id - a.id)
-        break
+        filtered.sort((a, b) => b.discount - a.discount);
+        break;
+      default:
+        filtered.sort((a, b) => b.id - a.id);
     }
 
-    setFilteredProducts(filtered)
-    setPagination(prev => ({
-      ...prev,
-      currentPage: 1
-    }));
-  }
+    setFilteredProducts(filtered);
+  };
 
-  // Handle category selection
-  const handleCategoryChange = (category) => {
-    if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter((cat) => cat !== category))
+  const handleCategoryChange = (categoryId) => {
+    if (selectedCategories.includes(categoryId)) {
+      setSelectedCategories(prev => 
+        prev.filter(id => id !== categoryId)
+      );
     } else {
-      setSelectedCategories([...selectedCategories, category])
+      setSelectedCategories(prev => [...prev, categoryId]);
     }
-  }
+  };
 
-  // Handle price range change
+  // Add this effect to reapply filters when dependencies change
+  useEffect(() => {
+    applyFilters();
+  }, [selectedCategories, priceRange, sortBy, searchTerm, products]);
+
   const handlePriceChange = (index, value) => {
     const newPriceRange = [...priceRange]
     newPriceRange[index] = Number.parseInt(value)
     setPriceRange(newPriceRange)
   }
 
-  // Apply filters when filter state changes
-  useEffect(() => {
-    applyFilters()
-  }, [selectedCategories, priceRange, sortBy])
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const searchValue = e.target.querySelector('input[type="search"]').value;
+    setSearchTerm(searchValue);
+    setPagination(prev => ({...prev, currentPage: 1})); // Reset to first page on search
+  };
 
-  // Update useEffect to refetch when page changes
-  useEffect(() => {
-    fetchProducts();
-  }, [pagination.currentPage]);
+  const renderCategory = (category, level = 0) => {
+    return (
+      <div key={category.id} className="category-item" style={{ paddingLeft: `${level * 20}px` }}>
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={selectedCategories.includes(category.id)}
+            onChange={() => handleCategoryChange(category.id)}
+          />
+          {category.title}
+        </label>
+        {category.children && category.children.length > 0 && (
+          <div className="nested-categories">
+            {category.children.map(child => renderCategory(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
-  // Update paginate function
   const paginate = (pageNumber) => {
     setPagination(prev => ({
       ...prev,
       currentPage: pageNumber
     }));
-  };
+  }
 
-  // Toggle mobile filters
   const toggleFilters = () => {
     setFiltersOpen(!filtersOpen)
   }
 
-  // Clear all filters
   const clearFilters = () => {
     setSelectedCategories([])
     setPriceRange([0, 2000000])
     setSortBy("newest")
   }
 
-  // Format price to VND
   const formatPrice = (price) => {
     return `$${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
   }
 
-  // Render star rating
   const renderStars = (rating) => {
     const stars = []
     const fullStars = Math.floor(rating)
@@ -203,20 +260,22 @@ const ProductsPage = () => {
     <div className="products-page">
       <div className="page-header">
         <div className="container">
-          <h1>Sản phẩm</h1>
-          <div className="breadcrumb">
-            <Link to="/">Trang chủ</Link>
-            <span className="separator">/</span>
-            <span className="current">Sản phẩm</span>
-          </div>
+          <form onSubmit={handleSearch} className="search-form">
+            <input 
+              type="search"
+              placeholder="Tìm kiếm sản phẩm..."
+              defaultValue={searchTerm}
+            />
+            <button type="submit">
+              <FaSearch />
+            </button>
+          </form>
         </div>
       </div>
-
       <div className="container">
         <button className="filter-toggle-mobile" onClick={toggleFilters}>
           <i className="fas fa-filter"></i> Bộ lọc sản phẩm
         </button>
-
         <div className="products-container">
           <div className={`filters-sidebar ${filtersOpen ? "open" : ""}`}>
             <div className="filters-header">
@@ -234,19 +293,9 @@ const ProductsPage = () => {
                   </span>
                 </div>
                 <div className="filter-options">
-                  {categories.map((category) => (
-                    <label key={category.id} className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(category.title)}
-                        onChange={() => handleCategoryChange(category.title)}
-                      />
-                      {category.title}
-                    </label>
-                  ))}
+                  {categories.map(category => renderCategory(category))}
                 </div>
               </div>
-
               <div className="filter-group">
                 <div className="filter-header">
                   <h4>Giá</h4>
@@ -301,13 +350,11 @@ const ProductsPage = () => {
                   </div>
                 </div>
               </div>
-
               <button className="apply-filters" onClick={applyFilters}>
                 Áp dụng bộ lọc
               </button>
             </div>
           </div>
-
           <div className="products-main">
             <div className="products-header">
               <div className="products-count">
@@ -324,7 +371,6 @@ const ProductsPage = () => {
                 </select>
               </div>
             </div>
-
             {loading ? (
               <div className="loading-products">
                 <div className="spinner"></div>
@@ -374,7 +420,6 @@ const ProductsPage = () => {
                 ))}
               </div>
             )}
-
             {filteredProducts.length > 0 && (
               <div className="pagination">
                 <ul className="pagination-list">

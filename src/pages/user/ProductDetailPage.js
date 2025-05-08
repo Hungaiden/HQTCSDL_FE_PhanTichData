@@ -27,76 +27,75 @@ const ProductDetailPage = () => {
   const [relatedProducts, setRelatedProducts] = useState([])
 
   useEffect(() => {
-    // Scroll to top when component mounts
-    window.scrollTo(0, 0)
+    window.scrollTo(0, 0);
+    fetchProductDetails();
+    fetchRelatedProducts();
+  }, [productId]);
 
-    // Simulate API call to fetch product details
-    setTimeout(() => {
-      const mockProduct = {
-        id: productId,
-        name: "Áo thun nam cổ tròn basic",
-        price: 299000,
-        discount: 15,
-        rating: 4.5,
-        reviewCount: 120,
-        description:
-          "Áo thun nam cổ tròn basic với chất liệu cotton 100% mang lại cảm giác thoáng mát, thấm hút mồ hôi tốt. Thiết kế đơn giản, dễ phối đồ, phù hợp với nhiều phong cách khác nhau.",
-        details: [
-          "Chất liệu: Cotton 100%",
-          "Kiểu dáng: Regular fit",
-          "Xuất xứ: Việt Nam",
-          "Bảo quản: Giặt máy ở nhiệt độ thường, không tẩy, ủi ở nhiệt độ thấp",
-        ],
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["Đen", "Trắng", "Xanh navy", "Xám"],
-        stock: 50,
-        images: [
-          "/placeholder.svg?height=600&width=600",
-          "/placeholder.svg?height=600&width=600",
-          "/placeholder.svg?height=600&width=600",
-          "/placeholder.svg?height=600&width=600",
-        ],
-        category: "Thời trang nam",
+  const fetchProductDetails = async () => {
+    try {
+      const response = await fetch(
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products/${productId}`
+      );
+      const data = await response.json();
+      
+      if (data.data) {
+        const productData = data.data;
+        // Fetch category info
+        const categoryResponse = await fetch(
+          `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/${productData.category_id}`
+        );
+        const categoryData = await categoryResponse.json();
+        
+        setProduct({
+          id: productData._id,
+          name: productData.title,
+          price: productData.price,
+          originalPrice: productData.originalPrice || productData.price,
+          discount: productData.discount || 0,
+          description: productData.description || "",
+          category: categoryData.data ? categoryData.data.title : "Chưa phân loại",
+          categoryId: productData.category_id,
+          stock: productData.stock || 0,
+          rating: productData.rating || 4.5,
+          reviewCount: productData.reviewCount || 0,
+          images: [productData.thumbnail || "/placeholder.svg"],
+          sizes: ["S", "M", "L", "XL"], // You can add these to your API if needed
+          colors: ["Đen", "Trắng", "Xanh navy", "Xám"], // You can add these to your API if needed
+          details: productData.details || [] // Add default empty array
+        });
       }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      setLoading(false);
+    }
+  };
 
-      setProduct(mockProduct)
-      setLoading(false)
-
-      // Fetch related products
-      const mockRelatedProducts = [
-        {
-          id: 101,
-          name: "Áo polo nam basic",
-          price: 359000,
-          discount: 0,
-          image: "/placeholder.svg?height=300&width=300",
-        },
-        {
-          id: 102,
-          name: "Áo thun nam họa tiết",
-          price: 329000,
-          discount: 10,
-          image: "/placeholder.svg?height=300&width=300",
-        },
-        {
-          id: 103,
-          name: "Áo sơ mi nam dài tay",
-          price: 459000,
-          discount: 0,
-          image: "/placeholder.svg?height=300&width=300",
-        },
-        {
-          id: 104,
-          name: "Áo khoác jean nam",
-          price: 699000,
-          discount: 20,
-          image: "/placeholder.svg?height=300&width=300",
-        },
-      ]
-
-      setRelatedProducts(mockRelatedProducts)
-    }, 500)
-  }, [productId])
+  const fetchRelatedProducts = async () => {
+    try {
+      const response = await fetch(
+        `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products`
+      );
+      const data = await response.json();
+      
+      if (data.data && data.data.products) {
+        const relatedProds = data.data.products
+          .filter(prod => prod._id !== productId)
+          .slice(0, 4)
+          .map(prod => ({
+            id: prod._id,
+            name: prod.title,
+            price: prod.price,
+            discount: prod.discount || 0,
+            image: prod.thumbnail || "/placeholder.svg"
+          }));
+        setRelatedProducts(relatedProds);
+      }
+    } catch (error) {
+      console.error("Error fetching related products:", error);
+    }
+  };
 
   const handleQuantityChange = (value) => {
     const newQuantity = quantity + value
@@ -310,11 +309,20 @@ const ProductDetailPage = () => {
             <div className="tab-pane active">
               <h3>Chi tiết sản phẩm</h3>
               <ul className="product-details-list">
-                {product.details.map((detail, index) => (
+                {/* Only map if details array exists */}
+                {product.details && product.details.map((detail, index) => (
                   <li key={index}>{detail}</li>
                 ))}
+                {/* Add default details if none provided */}
+                {(!product.details || product.details.length === 0) && (
+                  <>
+                    <li>Chất liệu: Cotton cao cấp</li>
+                    <li>Xuất xứ: Việt Nam</li>
+                    <li>Phong cách: Hiện đại, trẻ trung</li>
+                  </>
+                )}
               </ul>
-
+              {/* Rest of the details section */}
               <h3>Hướng dẫn bảo quản</h3>
               <ul className="product-care-list">
                 <li>Giặt máy ở nhiệt độ thường</li>

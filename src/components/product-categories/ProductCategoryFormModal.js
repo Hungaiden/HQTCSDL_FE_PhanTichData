@@ -12,9 +12,12 @@ const ProductCategoryFormModal = ({ category, onSave, onClose }) => {
     description: "",
     status: "Hiện",
     position: 0,
+    parent_id: ""
   });
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
+    fetchCategories();
     if (category) {
       setFormData({
         id: category.id,
@@ -22,9 +25,24 @@ const ProductCategoryFormModal = ({ category, onSave, onClose }) => {
         description: category.description,
         status: category.status,
         position: category.position,
+        parent_id: category.parent_id || ""
       });
     }
   }, [category]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(
+        "https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/all"
+      );
+      const data = await response.json();
+      if (data.data && data.data.categories) {
+        setCategories(data.data.categories);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,6 +110,25 @@ const ProductCategoryFormModal = ({ category, onSave, onClose }) => {
               <option value="Hiện"> Hiện </option>{" "}
               <option value="Ẩn"> Ẩn </option>{" "}
             </select>{" "}
+          </div>
+          <div className="form-group">
+            <label htmlFor="parent_id">Danh mục cha</label>
+            <select
+              id="parent_id"
+              name="parent_id"
+              value={formData.parent_id}
+              onChange={handleChange}
+            >
+              <option value="">Không có danh mục cha</option>
+              {categories
+                .filter(cat => cat._id !== formData.id) // Prevent self-reference
+                .map(cat => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.title}
+                  </option>
+                ))
+              }
+            </select>
           </div>
           <div className="modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose}>

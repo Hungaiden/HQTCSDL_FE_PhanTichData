@@ -142,10 +142,10 @@ const HomePage = () => {
       <section className="products-section">
         <div className="container">
           <div className="section-header">
-            <h2>Sản phẩm nổi bật</h2>
+            {/* <h2>Sản phẩm nổi bật</h2>
             <Link to="/products" className="view-all">
               Xem tất cả <FaArrowRight />
-            </Link>
+            </Link> */}
           </div>
 
           {loading ? (
