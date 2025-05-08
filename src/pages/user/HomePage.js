@@ -27,8 +27,8 @@ const HomePage = () => {
       const data = await response.json()
       if (data.data && data.data.categories) {
         const activeCategories = data.data.categories
-          .filter(cat => cat.status === "active")
-          .slice(0, 3) // Chỉ lấy 3 danh mục đầu tiên
+          .filter(cat => cat.status === "active" && cat.isFeatured === true)
+          .slice(0, 3) // Chỉ lấy 3 danh mục nổi bật đầu tiên
         setCategories(activeCategories)
       }
     } catch (error) {
@@ -80,8 +80,8 @@ const HomePage = () => {
       const data = await response.json()
       if (data.data && data.data.products) {
         const bestSelling = data.data.products
-          .filter(product => product.status === "active")
-          .slice(0, 8)
+          .filter(product => product.status === "active" && product.isFeatured === true)
+          .slice(0, 8) 
         setBestSellers(bestSelling)
       }
     } catch (error) {
@@ -252,7 +252,7 @@ const HomePage = () => {
       <section className="products-section">
         <div className="container">
           <div className="section-header">
-            <h2>Sản phẩm bán chạy</h2>
+            <h2>Sản phẩm nổi bật</h2>
             <Link to="/products?sort=bestselling" className="view-all">
               Xem tất cả <FaArrowRight />
             </Link>

@@ -14,6 +14,7 @@ const ProductFormModal = ({ product, onSave, onClose, categories }) => {
     stock: "",
     description: "",
     image: null,
+    isFeatured: false
   })
 
   useEffect(() => {
@@ -26,6 +27,7 @@ const ProductFormModal = ({ product, onSave, onClose, categories }) => {
         stock: product.stock,
         description: product.description || "",
         image: product.image || null,
+        isFeatured: product.isFeatured || false
       })
     }
   }, [product])
@@ -129,6 +131,24 @@ const ProductFormModal = ({ product, onSave, onClose, categories }) => {
                 <p className="upload-hint">Định dạng hỗ trợ: JPG, PNG. Kích thước tối đa: 2MB</p>
               </div>
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="isFeatured" className="checkbox-label">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                name="isFeatured"
+                checked={formData.isFeatured}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    isFeatured: e.target.checked
+                  });
+                }}
+              />
+              <span>Sản phẩm nổi bật</span>
+            </label>
           </div>
 
           <div className="modal-footer">

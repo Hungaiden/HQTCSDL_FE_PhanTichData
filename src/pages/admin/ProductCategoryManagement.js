@@ -40,6 +40,7 @@ const ProductCategoryManagement = () => {
           description: category.description || "",
           status: category.status || "Hiện",
           position: category.position || 0,
+          isFeatured: category.isFeatured || false,
         }));
         setCategories(formattedCategories);
         setPagination(paginationData);
@@ -100,6 +101,7 @@ const ProductCategoryManagement = () => {
         description: categoryData.description,
         status: categoryData.status,
         position: categoryData.position,
+        isFeatured: categoryData.isFeatured // Add this
       };
 
       if (categoryData.id) {
@@ -161,7 +163,7 @@ const ProductCategoryManagement = () => {
           <thead>
             <tr>
               <th> Tên danh mục </th> <th> Mô tả </th>{" "}
-              <th> Vị trí </th> <th> Trạng thái </th> <th> Thao tác </th>{" "}
+              <th> Vị trí </th> <th> Trạng thái </th> <th> Nổi bật </th> <th> Thao tác </th>{" "}
             </tr>{" "}
           </thead>{" "}
           <tbody>
@@ -180,6 +182,33 @@ const ProductCategoryManagement = () => {
                     {category.status}{" "}
                   </span>{" "}
                 </td>{" "}
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={category.isFeatured}
+                    onChange={async () => {
+                      try {
+                        const response = await fetch(
+                          `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/categories/update/${category.id}`,
+                          {
+                            method: "PATCH",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              isFeatured: !category.isFeatured
+                            }),
+                          }
+                        );
+                        if (response.ok) {
+                          fetchCategories(); // Refresh the list
+                        }
+                      } catch (error) {
+                        console.error("Error updating featured status:", error);
+                      }
+                    }}
+                  />
+                </td>
                 <td>
                   <div className="action-buttons">
                     <button

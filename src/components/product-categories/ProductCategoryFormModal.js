@@ -12,7 +12,8 @@ const ProductCategoryFormModal = ({ category, onSave, onClose }) => {
     description: "",
     status: "Hiện",
     position: 0,
-    parent_id: ""
+    parent_id: "",
+    isFeatured: false // Add this
   });
   const [categories, setCategories] = useState([]);
 
@@ -25,7 +26,8 @@ const ProductCategoryFormModal = ({ category, onSave, onClose }) => {
         description: category.description,
         status: category.status,
         position: category.position,
-        parent_id: category.parent_id || ""
+        parent_id: category.parent_id || "",
+        isFeatured: category.isFeatured || false
       });
     }
   }, [category]);
@@ -129,6 +131,25 @@ const ProductCategoryFormModal = ({ category, onSave, onClose }) => {
                 ))
               }
             </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="isFeatured" className="checkbox-label">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                name="isFeatured"
+                checked={formData.isFeatured}
+                onChange={(e) => {
+                  const newFormData = {
+                    ...formData,
+                    isFeatured: e.target.checked
+                  };
+                  setFormData(newFormData);
+                  onSave(newFormData);
+                }}
+              />
+              <span>Danh mục nổi bật</span>
+            </label>
           </div>
           <div className="modal-footer">
             <button type="button" className="btn-secondary" onClick={onClose}>

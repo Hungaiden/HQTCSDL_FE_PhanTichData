@@ -68,6 +68,7 @@ const ProductManagement = () => {
           price: product.price,
           status: product.status || "Còn hàng",
           stock: product.stock || 0,
+          isFeatured: product.isFeatured || false // Add this
         }));
         setProducts(formattedProducts);
         setPagination(paginationData);
@@ -220,7 +221,7 @@ const ProductManagement = () => {
             <tr>
               <th> Tên sản phẩm </th>{" "} <th> Hình ảnh </th> 
               <th> Danh mục </th> <th> Giá </th> <th> Tồn kho </th>{" "}
-              <th> Trạng thái </th> <th> Thao tác </th>{" "}
+              <th> Trạng thái </th> <th> Nổi bật </th> <th> Thao tác </th>{" "}
             </tr>{" "}
           </thead>{" "}
           <tbody>
@@ -251,6 +252,33 @@ const ProductManagement = () => {
                   >
                     {product.status}{" "}
                   </span>{" "}
+                </td>{" "}
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={product.isFeatured}
+                    onChange={async () => {
+                      try {
+                        const response = await fetch(
+                          `https://hqtcsdl-git-main-bui-duc-hungs-projects.vercel.app/admin/products/update/${product.id}`,
+                          {
+                            method: "PATCH",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              isFeatured: !product.isFeatured
+                            }),
+                          }
+                        );
+                        if (response.ok) {
+                          fetchProducts(); // Refresh the list
+                        }
+                      } catch (error) {
+                        console.error("Error updating featured status:", error);
+                      }
+                    }}
+                  />
                 </td>{" "}
                 <td>
                   <div className="action-buttons">
