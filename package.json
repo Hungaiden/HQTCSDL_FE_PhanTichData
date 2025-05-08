@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "CI=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -42,5 +42,8 @@
   },
   "devDependencies": {
     "sass": "^1.85.0"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
