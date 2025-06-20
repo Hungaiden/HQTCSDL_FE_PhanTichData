@@ -7,68 +7,68 @@
       border: 1px solid var(--border-color);
       border-radius: 0.375rem;
       padding: 0 0.75rem;
-      
+
       svg {
         color: var(--text-light);
         margin-right: 0.5rem;
       }
-      
+
       select {
         border: none;
         padding: 0.5rem 0;
         font-size: 0.875rem;
         background: transparent;
-        
+
         &:focus {
           outline: none;
         }
       }
     }
   }
-  
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     margin-bottom: 1.5rem;
-    
+
     .stat-card {
       background-color: var(--bg-white);
       border-radius: 0.5rem;
       padding: 1.25rem;
       box-shadow: var(--shadow);
-      
+
       &.wide {
         grid-column: span 2;
       }
-      
+
       .stat-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1rem;
-        
+
         h3 {
           font-size: 1rem;
           margin: 0;
         }
-        
+
         svg {
           color: var(--text-light);
         }
       }
-      
+
       .chart-container {
         height: 250px;
         position: relative;
-        
+
         .chart-placeholder {
           text-align: center;
           color: var(--text-light);
-          
+
           p {
             margin: 0;
-            
+
             &.chart-note {
               font-size: 0.75rem;
               color: var(--text-muted);
@@ -76,11 +76,11 @@
             }
           }
         }
-        
+
         .chart {
           width: 100%;
           height: 100%;
-          
+
           &.sales-chart {
             .chart-bars {
               display: flex;
@@ -88,7 +88,7 @@
               justify-content: space-between;
               height: 100%;
               padding-top: 20px;
-              
+
               .chart-bar {
                 flex: 1;
                 margin: 0 5px;
@@ -97,20 +97,20 @@
                 position: relative;
                 transition: all 0.3s ease;
                 min-height: 20px;
-                
+
                 &:hover {
                   background: linear-gradient(to top, rgba(90, 103, 216, 0.6), rgba(90, 103, 216, 1));
                   transform: scaleY(1.05);
                 }
-                
+
                 &.active {
                   background: linear-gradient(to top, rgba(56, 161, 105, 0.4), rgba(56, 161, 105, 0.8));
-                  
+
                   &:hover {
                     background: linear-gradient(to top, rgba(56, 161, 105, 0.6), rgba(56, 161, 105, 1));
                   }
                 }
-                
+
                 .chart-value {
                   position: absolute;
                   top: -20px;
@@ -120,7 +120,7 @@
                   font-weight: 600;
                   white-space: nowrap;
                 }
-                
+
                 .chart-label {
                   position: absolute;
                   bottom: -25px;
@@ -133,26 +133,24 @@
             }
           }
         }
-        
+
         .pie-chart {
           width: 100%;
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          
+
           .pie-chart-container {
             position: relative;
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            background: conic-gradient(
-              var(--primary-color) 0% 45%,
-              var(--info-color) 45% 80%,
-              var(--warning-color) 80% 95%,
-              var(--secondary-color) 95% 100%
-            );
-            
+            background: conic-gradient(var(--primary-color) 0% 45%,
+                var(--info-color) 45% 80%,
+                var(--warning-color) 80% 95%,
+                var(--secondary-color) 95% 100%);
+
             &::before {
               content: '';
               position: absolute;
@@ -166,18 +164,18 @@
             }
           }
         }
-        
+
         .horizontal-bar-chart {
           height: 100%;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          
+
           .h-bar-item {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            
+
             .h-bar-label {
               width: 100px;
               font-size: 0.75rem;
@@ -185,7 +183,7 @@
               overflow: hidden;
               text-overflow: ellipsis;
             }
-            
+
             .h-bar-container {
               flex: 1;
               height: 20px;
@@ -193,14 +191,14 @@
               border-radius: 10px;
               position: relative;
               overflow: hidden;
-              
+
               .h-bar {
                 height: 100%;
                 background: linear-gradient(to right, rgba(90, 103, 216, 0.4), rgba(90, 103, 216, 0.8));
                 border-radius: 10px;
                 transition: width 0.5s ease;
               }
-              
+
               .h-bar-value {
                 position: absolute;
                 right: 10px;
@@ -213,7 +211,7 @@
             }
           }
         }
-        
+
         .monthly-revenue-chart {
           .chart-bars {
             display: flex;
@@ -221,7 +219,7 @@
             justify-content: space-between;
             height: 100%;
             padding-top: 20px;
-            
+
             .chart-bar {
               flex: 1;
               margin: 0 3px;
@@ -230,20 +228,20 @@
               position: relative;
               transition: all 0.3s ease;
               min-height: 20px;
-              
+
               &:hover {
                 background: linear-gradient(to top, rgba(66, 153, 225, 0.6), rgba(66, 153, 225, 1));
                 transform: scaleY(1.05);
               }
-              
+
               &.active {
                 background: linear-gradient(to top, rgba(56, 161, 105, 0.4), rgba(56, 161, 105, 0.8));
-                
+
                 &:hover {
                   background: linear-gradient(to top, rgba(56, 161, 105, 0.6), rgba(56, 161, 105, 1));
                 }
               }
-              
+
               .chart-value {
                 position: absolute;
                 top: -20px;
@@ -253,7 +251,7 @@
                 font-weight: 600;
                 white-space: nowrap;
               }
-              
+
               .chart-label {
                 position: absolute;
                 bottom: -25px;
@@ -266,37 +264,37 @@
           }
         }
       }
-      
+
       .chart-legend {
         margin-top: 1rem;
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        
+
         .legend-item {
           display: flex;
           align-items: center;
           margin-bottom: 0.5rem;
           font-size: 0.75rem;
-          
+
           .color-box {
             width: 12px;
             height: 12px;
             border-radius: 2px;
             margin-right: 0.5rem;
-            
+
             &.men {
               background-color: var(--primary-color);
             }
-            
+
             &.women {
               background-color: var(--info-color);
             }
-            
+
             &.accessories {
               background-color: var(--warning-color);
             }
-            
+
             &.other {
               background-color: var(--secondary-color);
             }
@@ -305,45 +303,47 @@
       }
     }
   }
-  
+
   .stats-tables {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
-    
+
     .stats-table {
       background-color: var(--bg-white);
       border-radius: 0.5rem;
       padding: 1.25rem;
       box-shadow: var(--shadow);
-      
+
       h3 {
         font-size: 1rem;
         margin-bottom: 1rem;
       }
-      
+
       table {
-        th, td {
+
+        th,
+        td {
           padding: 0.75rem;
           text-align: left;
           border-bottom: 1px solid var(--border-color);
           font-size: 0.875rem;
         }
-        
+
         th {
           font-weight: 600;
           background-color: var(--bg-light);
         }
-        
+
         tr:last-child td {
           border-bottom: none;
         }
-        
+
         .positive {
           color: var(--success-color);
           font-weight: 600;
         }
-        
+
         .negative {
           color: var(--danger-color);
           font-weight: 600;
@@ -351,26 +351,24 @@
       }
     }
   }
-  
+
   // Thêm biểu đồ mới
   .donut-chart-container {
     position: relative;
     width: 180px;
     height: 180px;
     margin: 0 auto;
-    
+
     .donut-chart {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: conic-gradient(
-        var(--success-color) 0% 35%,
-        var(--info-color) 35% 65%,
-        var(--warning-color) 65% 85%,
-        var(--danger-color) 85% 100%
-      );
+      background: conic-gradient(var(--success-color) 0% 35%,
+          var(--info-color) 35% 65%,
+          var(--warning-color) 65% 85%,
+          var(--danger-color) 85% 100%);
       position: relative;
-      
+
       &::before {
         content: '';
         position: absolute;
@@ -383,100 +381,100 @@
         border-radius: 50%;
       }
     }
-    
+
     .donut-center {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      
+
       .donut-value {
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--text-dark);
       }
-      
+
       .donut-label {
         font-size: 0.75rem;
         color: var(--text-light);
       }
     }
   }
-  
+
   .area-chart {
     position: relative;
     height: 200px;
     margin-top: 20px;
-    
+
     .area-path {
       fill: url(#area-gradient);
       opacity: 0.7;
     }
-    
+
     .area-line {
       fill: none;
       stroke: var(--primary-color);
       stroke-width: 2;
     }
-    
+
     .area-point {
       fill: white;
       stroke: var(--primary-color);
       stroke-width: 2;
       r: 4;
       transition: r 0.2s ease;
-      
+
       &:hover {
         r: 6;
         cursor: pointer;
       }
     }
-    
+
     .area-grid {
       stroke: rgba(0, 0, 0, 0.05);
       stroke-dasharray: 4;
     }
-    
+
     .area-axis {
       font-size: 0.7rem;
       color: var(--text-light);
     }
   }
-  
+
   .comparison-chart {
     display: flex;
     height: 200px;
     align-items: flex-end;
     margin-top: 20px;
-    
+
     .comparison-group {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 0 10px;
-      
+
       .comparison-bars {
         display: flex;
         width: 100%;
         height: 100%;
         align-items: flex-end;
-        
+
         .comparison-bar {
           flex: 1;
           margin: 0 2px;
           border-radius: 4px 4px 0 0;
           position: relative;
-          
+
           &.current {
             background: linear-gradient(to top, rgba(90, 103, 216, 0.4), rgba(90, 103, 216, 0.8));
           }
-          
+
           &.previous {
             background: linear-gradient(to top, rgba(160, 174, 192, 0.4), rgba(160, 174, 192, 0.8));
           }
-          
+
           .bar-value {
             position: absolute;
             top: -20px;
@@ -488,7 +486,7 @@
           }
         }
       }
-      
+
       .comparison-label {
         margin-top: 10px;
         font-size: 0.75rem;
@@ -516,18 +514,158 @@
   // Remove or comment out the old chart styles since we're using PowerBI
   // .stats-grid {...}
   // .stats-tables {...}
-  
+
   @media (max-width: 992px) {
     .stats-grid {
       grid-template-columns: 1fr;
-      
+
       .stat-card.wide {
         grid-column: span 1;
       }
     }
-    
+
     .stats-tables {
       grid-template-columns: 1fr;
+    }
+  }
+
+  .statistics-page {
+    padding: 32px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9fb;
+    min-height: 100vh;
+    color: #333;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+
+  /* AI Analytics Box */
+  .ai-analytics-box {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    max-width: 800px;
+    margin: auto;
+    transition: all 0.3s ease;
+  }
+
+  .analyze-btn {
+    background-color: #4a90e2;
+    color: white;
+    font-size: 16px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+  }
+
+  .analyze-btn:hover {
+    background-color: #357ab8;
+  }
+
+  .output-box {
+    background-color: #f3f7fd;
+    border: 1px solid #d0e2ff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    color: #333;
+  }
+
+  .ai-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #2c3e50;
+  }
+
+  .ai-qa-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .ai-qa-input {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .ai-qa-input:focus {
+    border-color: #4a90e2;
+  }
+
+  .ai-qa-btn {
+    background-color: #27ae60;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-qa-btn:hover {
+    background-color: #1e874b;
+  }
+
+  .ai-qa-answer {
+    background-color: #fefefe;
+    border: 1px solid #e1e1e1;
+    border-radius: 10px;
+    padding: 14px;
+    font-style: italic;
+    color: #555;
+  }
+
+  .markdown-content {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #222;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 20px 18px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px #0001;
+    border: 1px solid #e0e0e0;
+    max-height: 420px;
+    overflow-y: auto;
+
+    h2,
+    h3 {
+      color: #1976d2;
+      margin-top: 1.2em;
+    }
+
+    ul,
+    ol {
+      margin-left: 1.5em;
+      margin-bottom: 1em;
+    }
+
+    strong {
+      color: #1976d2;
     }
   }
 }
