@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import ReactMarkdown from "react-markdown";
 import { FaCalendarAlt, FaChartBar, FaChartLine, FaChartPie, FaInfoCircle } from "react-icons/fa"
 import "../../styles/pages/statistics.scss"
@@ -47,6 +47,18 @@ const Statistics = () => {
       setLoading(false);
     }
   };
+
+  // ✅ Tự động reload Power BI iframe mỗi 5 phút
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const iframe = document.querySelector("iframe[title='hqtcsdl']")
+      if (iframe) {
+        iframe.src = iframe.src
+      }
+    }, 5 * 60 * 1000) // 5 phút
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="statistics-page">
